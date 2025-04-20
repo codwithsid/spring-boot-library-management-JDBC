@@ -1,0 +1,7 @@
+package com.librarymanagement.demo.exception.transactionException;
+
+public class TransactionNotFoundException extends RuntimeException {
+    public TransactionNotFoundException(String message) {
+        super(message);
+    }
+}
