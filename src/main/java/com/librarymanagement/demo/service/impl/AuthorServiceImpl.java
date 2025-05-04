@@ -4,6 +4,7 @@ import com.librarymanagement.demo.exception.authorException.AuthorNotFoundExcept
 import com.librarymanagement.demo.model.Author;
 import com.librarymanagement.demo.repository.AuthorRepository;
 import com.librarymanagement.demo.service.AuthorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +25,11 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public Author getAuthorById(int authorId) {
-        return authorRepository.findById(authorId)
-                .orElseThrow(() -> new AuthorNotFoundException("Author not found with ID: " + authorId));
+        Author author = authorRepository.findById(authorId);
+        if (author == null) {
+            throw new AuthorNotFoundException("Author not found with ID: " + authorId);
+        }
+        return author;
     }
 
     @Override
@@ -51,6 +55,6 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public List<Author> searchAuthorsByName(String authorName) {
-        return authorRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(authorName, authorName);
+        return authorRepository.findByNameLike(authorName);
     }
 }

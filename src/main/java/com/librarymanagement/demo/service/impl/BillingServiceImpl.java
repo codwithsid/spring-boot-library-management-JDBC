@@ -4,6 +4,7 @@ import com.librarymanagement.demo.exception.billingException.BillNotFoundExcepti
 import com.librarymanagement.demo.model.Billing;
 import com.librarymanagement.demo.repository.BillingRepository;
 import com.librarymanagement.demo.service.BillingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class BillingServiceImpl implements BillingService {
 
     private final BillingRepository billingRepository;
 
+    @Autowired
     public BillingServiceImpl(BillingRepository billingRepository) {
         this.billingRepository = billingRepository;
     }
@@ -24,8 +26,11 @@ public class BillingServiceImpl implements BillingService {
 
     @Override
     public Billing getBillingById(int billingId) {
-        return billingRepository.findById(billingId)
-                .orElseThrow(() -> new BillNotFoundException("Billing record not found with ID: " + billingId));
+        Billing billing = billingRepository.findById(billingId);
+        if (billing == null) {
+            throw new BillNotFoundException("Billing record not found with ID: " + billingId);
+        }
+        return billing;
     }
 
     @Override
@@ -38,7 +43,7 @@ public class BillingServiceImpl implements BillingService {
         if (!billingRepository.existsById(billing.getBillingId())) {
             throw new BillNotFoundException("Cannot update. Billing ID not found: " + billing.getBillingId());
         }
-        return billingRepository.save(billing);
+        return billingRepository.update(billing);
     }
 
     @Override

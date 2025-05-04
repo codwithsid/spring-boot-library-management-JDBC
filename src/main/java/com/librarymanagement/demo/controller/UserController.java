@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
@@ -53,7 +53,11 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable("id") int userId) {
-        userService.deleteUser(userId);
+        try {
+            userService.deleteUser(userId);
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok("✅ User deleted successfully!");
     }
 }

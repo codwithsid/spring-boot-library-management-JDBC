@@ -26,8 +26,11 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public Store getStoreById(int storeId) {
-        return storeRepository.findById(storeId)
-                .orElseThrow(() -> new StoreNotFoundException("Store with ID " + storeId + " not found"));
+        Store store = storeRepository.findById(storeId);
+        if (store == null) {
+            throw new StoreNotFoundException("Store with ID " + storeId + " not found");
+        }
+        return store;
     }
 
     @Override
@@ -36,11 +39,11 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public void updateStore(Store store) {
-        if (!storeRepository.existsById(store.getStoreId())) {
-            throw new StoreNotFoundException("Store with ID " + store.getStoreId() + " not found");
+    public void updateStore(Store updatedStore) {
+        if (!storeRepository.existsById(updatedStore.getStoreId())) {
+            throw new StoreNotFoundException("Store with ID " + updatedStore.getStoreId() + " not found");
         }
-        storeRepository.save(store);
+        storeRepository.update(updatedStore);
     }
 
     @Override

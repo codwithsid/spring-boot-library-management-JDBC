@@ -1,11 +1,9 @@
 package com.librarymanagement.demo.service.impl;
 
-
 import com.librarymanagement.demo.exception.userException.UserNotFoundException;
 import com.librarymanagement.demo.model.User;
 import com.librarymanagement.demo.repository.UserRepository;
 import com.librarymanagement.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,8 +11,11 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public void registerUser(User user) {
@@ -28,26 +29,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(int userId) throws UserNotFoundException {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            throw new UserNotFoundException("User with ID " + userId + " not found");
+        }
+        return user;
     }
 
     @Override
     public User updateUserByuserId(User newUser, int userId) throws UserNotFoundException {
-        return userRepository.findById(userId).map(user -> {
-            user.setFirstName(newUser.getFirstName());
-            user.setLastName(newUser.getLastName());
-            user.setEmailId(newUser.getEmailId());
-            user.setMobileNumber(newUser.getMobileNumber());
-            user.setRole(newUser.getRole());
-            user.setProfileImageUrl(newUser.getProfileImageUrl());
-            return userRepository.save(user);
-        }).orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User with ID " + userId + " not found");
+        }
+        newUser.setUserId(userId);
+        return userRepository.update(newUser);
     }
-
 
     @Override
-    public void deleteUser(int userId) {
+    public void deleteUser(int userId) throws UserNotFoundException {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotFoundException("User with ID " + userId + " not found");
+        }
         userRepository.deleteById(userId);
     }
+
 }

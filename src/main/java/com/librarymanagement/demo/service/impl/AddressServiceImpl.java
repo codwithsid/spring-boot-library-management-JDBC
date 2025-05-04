@@ -4,6 +4,7 @@ import com.librarymanagement.demo.exception.addressException.AddressNotFoundExce
 import com.librarymanagement.demo.model.Address;
 import com.librarymanagement.demo.repository.AddressRepository;
 import com.librarymanagement.demo.service.AddressService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,7 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
 
+    @Autowired
     public AddressServiceImpl(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
@@ -24,8 +26,11 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address getAddressById(int id) {
-        return addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException("Address not found with ID: " + id));
+        Address found = addressRepository.findById(id);
+        if (found == null) {
+            throw new AddressNotFoundException("Address not found with ID: " + id);
+        }
+        return found;
     }
 
     @Override
@@ -35,19 +40,10 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address updateAddress(int id, Address updatedAddress) {
-        Address existing = addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException("Cannot update. Address not found with ID: " + id));
-
-        existing.setStreet(updatedAddress.getStreet());
-        existing.setCity(updatedAddress.getCity());
-        existing.setState(updatedAddress.getState());
-        existing.setCountry(updatedAddress.getCountry());
-        existing.setPostalCode(updatedAddress.getPostalCode());
-        existing.setLandmark(updatedAddress.getLandmark());
-        existing.setAddressType(updatedAddress.getAddressType());
-        existing.setUser(updatedAddress.getUser());
-
-        return addressRepository.save(existing);
+        if (!addressRepository.existsById(id)) {
+            throw new AddressNotFoundException("Cannot update. Address not found with ID: " + id);
+        }
+        return addressRepository.update(id, updatedAddress);
     }
 
     @Override

@@ -12,8 +12,12 @@ import java.util.List;
 @Service
 public class BookServiceImpl implements BookService {
 
+    private final BookRepository bookRepository;
+
     @Autowired
-    private BookRepository bookRepository;
+    public BookServiceImpl(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
     @Override
     public void addBook(Book book) {
@@ -22,8 +26,11 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Book getBookById(int bookId) throws BookNotFoundException {
-        return bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + bookId));
+        Book book = bookRepository.findById(bookId);
+        if (book == null) {
+            throw new BookNotFoundException("Book not found with id: " + bookId);
+        }
+        return book;
     }
 
     @Override
@@ -33,20 +40,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void updateBook(Book updatedBook) throws BookNotFoundException {
-        Book book = getBookById(updatedBook.getBookId());
-        book.setTitle(updatedBook.getTitle());
-        book.setIsbn(updatedBook.getIsbn());
-        book.setPublishDate(updatedBook.getPublishDate());
-        book.setTotalCopies(updatedBook.getTotalCopies());
-        book.setAvailableCopies(updatedBook.getAvailableCopies());
-        book.setCategory(updatedBook.getCategory());
-        book.setLanguage(updatedBook.getLanguage());
-        book.setPrice(updatedBook.getPrice());
-        book.setAvailable(updatedBook.isAvailable());
-        book.setAuthor(updatedBook.getAuthor());
-        book.setPublisher(updatedBook.getPublisher());
-
-        bookRepository.save(book);
+        if (!bookRepository.existsById(updatedBook.getBookId())) {
+            throw new BookNotFoundException("Book not found with id: " + updatedBook.getBookId());
+        }
+        bookRepository.update(updatedBook);
     }
 
     @Override

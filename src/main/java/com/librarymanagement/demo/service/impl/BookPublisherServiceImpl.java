@@ -26,8 +26,11 @@ public class BookPublisherServiceImpl implements BookPublisherService {
 
     @Override
     public BookPublisher getPublisherById(int publisherId) {
-        return bookPublisherRepository.findById(publisherId)
-                .orElseThrow(() -> new BookPublisherNotFoundException("Publisher not found with ID: " + publisherId));
+        BookPublisher publisher = bookPublisherRepository.findById(publisherId);
+        if (publisher == null) {
+            throw new BookPublisherNotFoundException("Publisher not found with ID: " + publisherId);
+        }
+        return publisher;
     }
 
     @Override
@@ -37,21 +40,17 @@ public class BookPublisherServiceImpl implements BookPublisherService {
 
     @Override
     public BookPublisher updatePublisher(int id, BookPublisher updatedPublisher) {
-        BookPublisher existing = bookPublisherRepository.findById(id)
-                .orElseThrow(() -> new BookPublisherNotFoundException("Publisher not found with ID: " + id));
-
-        existing.setName(updatedPublisher.getName());
-        existing.setContactNumber(updatedPublisher.getContactNumber());
-        existing.setWebsite(updatedPublisher.getWebsite());
-        existing.setAddress(updatedPublisher.getAddress());
-
-        return bookPublisherRepository.save(existing);
+        if (!bookPublisherRepository.existsById(id)) {
+            throw new BookPublisherNotFoundException("Publisher not found with ID: " + id);
+        }
+        return bookPublisherRepository.update(updatedPublisher);
     }
 
     @Override
     public void deletePublisher(int publisherId) {
-        BookPublisher publisher = bookPublisherRepository.findById(publisherId)
-                .orElseThrow(() -> new BookPublisherNotFoundException("Publisher not found with ID: " + publisherId));
-        bookPublisherRepository.delete(publisher);
+        if (!bookPublisherRepository.existsById(publisherId)) {
+            throw new BookPublisherNotFoundException("Publisher not found with ID: " + publisherId);
+        }
+        bookPublisherRepository.deleteById(publisherId);
     }
 }
