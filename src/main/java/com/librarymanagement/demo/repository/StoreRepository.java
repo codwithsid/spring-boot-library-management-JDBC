@@ -1,7 +1,9 @@
 package com.librarymanagement.demo.repository;
 
+import ch.qos.logback.classic.Logger;
 import com.librarymanagement.demo.model.Store;
 import com.librarymanagement.demo.utility.JDBCUtility;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -11,7 +13,10 @@ import java.util.List;
 @Repository
 public class StoreRepository {
 
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(StoreRepository.class);
+
     public Store save(Store store) {
+        logger.info("🔽 Entered save()");
         String sql = "INSERT INTO store (name, contact_number, email, address_id) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -20,7 +25,7 @@ public class StoreRepository {
             stmt.setString(1, store.getName());
             stmt.setString(2, store.getContactNumber());
             stmt.setString(3, store.getEmail());
-            stmt.setInt(4, store.getStoreAddress().getAddressId()); // Assuming Address is already set
+            stmt.setInt(4, store.getStoreAddress().getAddressId());
 
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected == 0) {
@@ -36,13 +41,15 @@ public class StoreRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("❌ SQLException in save(): {}", e.getMessage());
         }
 
+        logger.info("✅ Exiting save()");
         return store;
     }
 
     public Store findById(int id) {
+        logger.info("🔽 Entered findById() with id: {}", id);
         String sql = "SELECT * FROM store WHERE store_id = ?";
         Store store = null;
 
@@ -57,13 +64,15 @@ public class StoreRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("❌ SQLException in findById(): {}", e.getMessage());
         }
 
+        logger.info("✅ Exiting findById()");
         return store;
     }
 
     public List<Store> findAll() {
+        logger.info("🔽 Entered findAll()");
         List<Store> stores = new ArrayList<>();
         String sql = "SELECT * FROM store";
 
@@ -76,13 +85,15 @@ public class StoreRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("❌ SQLException in findAll(): {}", e.getMessage());
         }
 
+        logger.info("✅ Exiting findAll()");
         return stores;
     }
 
     public Store update(Store store) {
+        logger.info("🔽 Entered update() with id: {}", store.getStoreId());
         String sql = "UPDATE store SET name = ?, contact_number = ?, email = ?, address_id = ? WHERE store_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -97,13 +108,15 @@ public class StoreRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("❌ SQLException in update(): {}", e.getMessage());
         }
 
+        logger.info("✅ Exiting update()");
         return store;
     }
 
     public void deleteById(int id) {
+        logger.info("🔽 Entered deleteById() with id: {}", id);
         String sql = "DELETE FROM store WHERE store_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -113,8 +126,30 @@ public class StoreRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("❌ SQLException in deleteById(): {}", e.getMessage());
         }
+
+        logger.info("✅ Exiting deleteById()");
+    }
+
+    public boolean existsById(int id) {
+        logger.info("🔽 Entered existsById() with id: {}", id);
+        String sql = "SELECT 1 FROM store WHERE store_id = ?";
+        try (Connection conn = JDBCUtility.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            boolean exists = rs.next();
+            logger.info("✅ Exiting existsById() with result: {}", exists);
+            return exists;
+
+        } catch (SQLException e) {
+            logger.error("❌ SQLException in existsById(): {}", e.getMessage());
+        }
+
+        logger.info("✅ Exiting existsById() with result: false");
+        return false;
     }
 
     private Store mapResultSetToStore(ResultSet rs) throws SQLException {
@@ -123,22 +158,6 @@ public class StoreRepository {
         store.setName(rs.getString("name"));
         store.setContactNumber(rs.getString("contact_number"));
         store.setEmail(rs.getString("email"));
-        // Assuming Address is handled separately
         return store;
-    }
-
-    public boolean existsById(int id) {
-        String sql = "SELECT 1 FROM store WHERE store_id = ?";
-        try (Connection conn = JDBCUtility.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 }

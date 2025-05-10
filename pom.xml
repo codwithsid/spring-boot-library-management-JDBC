@@ -13,19 +13,22 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>library-management</name>
 	<description>Library Management system which provides a role based access and many more latest features.</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
+
 	<developers>
-		<developer/>
+
+		<developer>
+			<name>Siddhant Bhore</name>
+			<email>siddhantbhore4645@gmail.com</email>
+			<id>siddhantbhore</id>
+			<url>https://codwithsid.github.io</url>
+
+			<roles>
+				<role>Developer</role>
+			</roles>
+
+		</developer>
 	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+
 	<properties>
 		<java.version>21</java.version>
 	</properties>
@@ -37,6 +40,17 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-tomcat</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-undertow</artifactId>
 		</dependency>
 
 		<dependency>
@@ -53,7 +67,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.30</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -67,15 +82,21 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version> <!-- make sure this is recent enough for Java 21 -->
 				<configuration>
+					<source>21</source>
+					<target>21</target>
+					<release>21</release> <!-- Optional, improves compatibility -->
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>1.18.30</version> <!-- Add this version -->
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

@@ -49,7 +49,7 @@ public class UserRepository {
     }
 
     public User findById(int id) {
-        String sql = "SELECT * FROM users WHERE user_id = ?";
+        String sql = "SELECT * FROM user WHERE user_id = ?";
         User user = null;
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -71,7 +71,7 @@ public class UserRepository {
 
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM user";
 
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -89,7 +89,7 @@ public class UserRepository {
     }
 
     public User update(User user) {
-        String sql = "UPDATE users SET first_name = ?, last_name = ?, email_id = ?, mobile_number = ?, role = ?, profile_image_url = ? WHERE user_id = ?";
+        String sql = "UPDATE user SET first_name = ?, last_name = ?, email_id = ?, mobile_number = ?, role = ?, profile_image_url = ? WHERE user_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -112,7 +112,7 @@ public class UserRepository {
     }
 
     public void deleteById(int id) {
-        String sql = "DELETE FROM users WHERE user_id = ?";
+        String sql = "DELETE FROM user WHERE user_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -142,7 +142,7 @@ public class UserRepository {
     }
 
     public boolean existsById(int id) {
-        String sql = "SELECT 1 FROM users WHERE user_id = ?";
+        String sql = "SELECT 1 FROM user WHERE user_id = ?";
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -157,7 +157,7 @@ public class UserRepository {
     }
 
     public User findByEmailId(String emailId) {
-        String sql = "SELECT * FROM users WHERE email_id = ?";
+        String sql = "SELECT * FROM user WHERE email_id = ?";
         User user = null;
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -178,7 +178,7 @@ public class UserRepository {
     }
 
     public User findByMobileNumber(String mobileNumber) {
-        String sql = "SELECT * FROM users WHERE mobile_number = ?";
+        String sql = "SELECT * FROM user WHERE mobile_number = ?";
         User user = null;
 
         try (Connection conn = JDBCUtility.getConnection();

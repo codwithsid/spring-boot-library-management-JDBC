@@ -10,7 +10,7 @@
     </appender>
 
     <appender name="STDFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/spring-boot-logging-app.log</file>
+        <file>logs/spring-boot-library-management.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %-5level %logger{36}.%M - %msg%n
@@ -19,14 +19,14 @@
 
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>
-                logs/archived/spring-boot-logging-app.%d{dd-MM-yyyy}.log
+                logs/archived/spring-boot-library-management.%d{dd-MM-yyyy}.log
             </fileNamePattern>
             <maxHistory>10</maxHistory>
             <totalSizeCap>1KB</totalSizeCap>
         </rollingPolicy>
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="STDFILE"/>
     </root>

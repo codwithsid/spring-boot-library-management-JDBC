@@ -2,6 +2,8 @@ package com.librarymanagement.demo.repository;
 
 import com.librarymanagement.demo.model.Address;
 import com.librarymanagement.demo.utility.JDBCUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -11,13 +13,16 @@ import java.util.List;
 @Repository
 public class AddressRepository {
 
+    private static final Logger logger = LoggerFactory.getLogger(AddressRepository.class);
+
     public Address save(Address address) {
+        logger.info("Saving new address to the database...");
         String sql = "INSERT INTO address (street, city, state, country, postal_code, landmark, address_type, user_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
+            // Set params
             stmt.setString(1, address.getStreet());
             stmt.setString(2, address.getCity());
             stmt.setString(3, address.getState());
@@ -27,27 +32,22 @@ public class AddressRepository {
             stmt.setString(7, address.getAddressType());
             stmt.setInt(8, address.getUser().getUserId());
 
-            int affectedRows = stmt.executeUpdate();
-            if (affectedRows == 0) {
-                throw new SQLException("Creating address failed, no rows affected.");
-            }
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    address.setAddressId(generatedKeys.getInt(1));
-                } else {
-                    throw new SQLException("Creating address failed, no ID obtained.");
+            stmt.executeUpdate();
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    address.setAddressId(keys.getInt(1));
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error saving address: {}", e.getMessage(), e);
         }
 
         return address;
     }
 
     public Address findById(int id) {
+        logger.info("Finding address by ID: {}", id);
         String sql = "SELECT * FROM address WHERE address_id = ?";
         Address address = null;
 
@@ -56,19 +56,19 @@ public class AddressRepository {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
-
             if (rs.next()) {
                 address = mapResultSetToAddress(rs);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error fetching address: {}", e.getMessage(), e);
         }
 
         return address;
     }
 
     public List<Address> findAll() {
+        logger.info("Fetching all addresses...");
         List<Address> addresses = new ArrayList<>();
         String sql = "SELECT * FROM address";
 
@@ -81,16 +81,16 @@ public class AddressRepository {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error fetching all addresses: {}", e.getMessage(), e);
         }
 
         return addresses;
     }
 
     public Address update(int id, Address updatedAddress) {
+        logger.info("Updating address with ID: {}", id);
         String sql = "UPDATE address SET street = ?, city = ?, state = ?, country = ?, postal_code = ?, landmark = ?, address_type = ?, user_id = ? " +
                 "WHERE address_id = ?";
-
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -108,15 +108,15 @@ public class AddressRepository {
             updatedAddress.setAddressId(id);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error updating address: {}", e.getMessage(), e);
         }
 
         return updatedAddress;
     }
 
     public void deleteById(int id) {
+        logger.info("Deleting address with ID: {}", id);
         String sql = "DELETE FROM address WHERE address_id = ?";
-
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -124,11 +124,12 @@ public class AddressRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error deleting address: {}", e.getMessage(), e);
         }
     }
 
     public boolean existsById(int id) {
+        logger.info("Checking existence of address with ID: {}", id);
         String sql = "SELECT 1 FROM address WHERE address_id = ?";
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -138,7 +139,7 @@ public class AddressRepository {
             return rs.next();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error checking address existence: {}", e.getMessage(), e);
         }
         return false;
     }

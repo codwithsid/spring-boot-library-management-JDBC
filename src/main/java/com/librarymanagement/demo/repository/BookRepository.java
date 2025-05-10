@@ -3,6 +3,8 @@ package com.librarymanagement.demo.repository;
 import com.librarymanagement.demo.model.Book;
 import com.librarymanagement.demo.utility.JDBCUtility;
 import org.springframework.stereotype.Repository;
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,7 +13,10 @@ import java.util.List;
 @Repository
 public class BookRepository {
 
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(BookRepository.class);
+
     public Book save(Book book) {
+        logger.info("Entering save() with book: {}", book);
         String sql = "INSERT INTO book (title, isbn, publish_date, total_copies, available_copies, category, language, price, is_available, author_id, publisher_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -26,7 +31,7 @@ public class BookRepository {
             stmt.setString(7, book.getLanguage());
             stmt.setDouble(8, book.getPrice());
             stmt.setBoolean(9, book.isAvailable());
-            stmt.setInt(10, book.getAuthor().getAuthorId());  // Assuming Author and Publisher are set already
+            stmt.setInt(10, book.getAuthor().getAuthorId());
             stmt.setInt(11, book.getPublisher().getPublisherId());
 
             int rowsAffected = stmt.executeUpdate();
@@ -37,19 +42,22 @@ public class BookRepository {
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     book.setBookId(generatedKeys.getInt(1));
+                    logger.info("Book saved successfully with ID: {}", book.getBookId());
                 } else {
                     throw new SQLException("Creating book failed, no ID obtained.");
                 }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in save(): {}", e.getMessage(), e);
         }
 
+        logger.info("Exiting save()");
         return book;
     }
 
     public Book findById(int id) {
+        logger.info("Entering findById() with ID: {}", id);
         String sql = "SELECT * FROM book WHERE book_id = ?";
         Book book = null;
 
@@ -61,16 +69,21 @@ public class BookRepository {
 
             if (rs.next()) {
                 book = mapResultSetToBook(rs);
+                logger.info("Book found with ID: {}", id);
+            } else {
+                logger.warn("No book found with ID: {}", id);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in findById(): {}", e.getMessage(), e);
         }
 
+        logger.info("Exiting findById()");
         return book;
     }
 
     public List<Book> findAll() {
+        logger.info("Entering findAll()");
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM book";
 
@@ -82,14 +95,18 @@ public class BookRepository {
                 books.add(mapResultSetToBook(rs));
             }
 
+            logger.info("Total books retrieved: {}", books.size());
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in findAll(): {}", e.getMessage(), e);
         }
 
+        logger.info("Exiting findAll()");
         return books;
     }
 
     public Book update(Book book) {
+        logger.info("Entering update() for book ID: {}", book.getBookId());
         String sql = "UPDATE book SET title = ?, isbn = ?, publish_date = ?, total_copies = ?, available_copies = ?, category = ?, language = ?, price = ?, is_available = ?, author_id = ?, publisher_id = ? WHERE book_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
@@ -108,27 +125,33 @@ public class BookRepository {
             stmt.setInt(11, book.getPublisher().getPublisherId());
             stmt.setInt(12, book.getBookId());
 
-            stmt.executeUpdate();
+            int rowsUpdated = stmt.executeUpdate();
+            logger.info("Rows updated: {}", rowsUpdated);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in update(): {}", e.getMessage(), e);
         }
 
+        logger.info("Exiting update()");
         return book;
     }
 
     public void deleteById(int id) {
+        logger.info("Entering deleteById() with ID: {}", id);
         String sql = "DELETE FROM book WHERE book_id = ?";
 
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            stmt.executeUpdate();
+            int rowsDeleted = stmt.executeUpdate();
+            logger.info("Rows deleted: {}", rowsDeleted);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in deleteById(): {}", e.getMessage(), e);
         }
+
+        logger.info("Exiting deleteById()");
     }
 
     private Book mapResultSetToBook(ResultSet rs) throws SQLException {
@@ -143,22 +166,28 @@ public class BookRepository {
         book.setLanguage(rs.getString("language"));
         book.setPrice(rs.getDouble("price"));
         book.setAvailable(rs.getBoolean("is_available"));
-        // Assuming Author and Publisher are set through another method if needed
         return book;
     }
 
     public boolean existsById(int id) {
+        logger.info("Entering existsById() with ID: {}", id);
         String sql = "SELECT 1 FROM book WHERE book_id = ?";
+
         try (Connection conn = JDBCUtility.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
-            return rs.next();
+            boolean exists = rs.next();
+            logger.info("Book exists: {}", exists);
+            return exists;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error in existsById(): {}", e.getMessage(), e);
         }
+
+        logger.info("Exiting existsById()");
         return false;
     }
 }
+
